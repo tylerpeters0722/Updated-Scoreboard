@@ -6,28 +6,49 @@
 <title>Live Sports Display</title>
 <style>
   * { box-sizing: border-box; }
-  html, body { margin:0; width:100%; height:100%; background:#050505; color:#fff; font-family:Arial,Helvetica,sans-serif; overflow:hidden; }
-  body { display:flex; flex-direction:column; }
-  header { padding:28px 24px 18px; border-bottom:2px solid #222; flex-shrink: 0; }
-  .title { font-size:34px; font-weight:800; letter-spacing:1px; }
-  .status { margin-top:7px; color:#aaa; font-size:16px; }
+  
+  /* Force 90-degree rotation for landscape displays mounted vertically */
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #050505;
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow: hidden;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    width: 100vh;
+    height: 100vw;
+    transform: rotate(90deg);
+    transform-origin: top left;
+    position: absolute;
+    top: 0;
+    left: 100vw;
+  }
+
+  header { padding: 28px 24px 18px; border-bottom: 2px solid #222; flex-shrink: 0; }
+  .title { font-size: 34px; font-weight: 800; letter-spacing: 1px; }
+  .status { margin-top: 7px; color: #aaa; font-size: 16px; }
   
   /* Scroll Container Setup */
-  main { flex:1; padding:18px 20px; overflow:hidden; display:flex; flex-direction:column; }
-  .sport { font-size:30px; font-weight:800; margin:0 0 14px; flex-shrink: 0; }
-  .games-wrapper { flex:1; overflow:hidden; position:relative; }
-  .games { display:flex; flex-direction:column; gap:12px; position:relative; top:0; transition: transform 0.05s linear; }
+  main { flex: 1; padding: 18px 20px; overflow: hidden; display: flex; flex-direction: column; }
+  .sport { font-size: 30px; font-weight: 800; margin: 0 0 14px; flex-shrink: 0; }
+  .games-wrapper { flex: 1; overflow: hidden; position: relative; }
+  .games { display: flex; flex-direction: column; gap: 12px; position: relative; top: 0; transition: transform 0.05s linear; }
   
   /* Team & Logo Layout */
-  .game { background:#111; border:1px solid #252525; border-radius:12px; padding:14px; }
-  .league { color:#888; font-size:13px; text-transform:uppercase; margin-bottom:8px; }
-  .team { display:flex; justify-content:space-between; align-items:center; font-size:22px; font-weight:700; padding:4px 0; }
-  .team-info { display:flex; align-items:center; gap:10px; }
-  .logo { width:30px; height:30px; object-fit:contain; }
-  .score { font-variant-numeric:tabular-nums; }
-  .state { color:#bbb; font-size:13px; margin-top:7px; }
-  .empty { color:#888; font-size:20px; padding-top:25px; }
-  footer { padding:12px 20px 20px; color:#777; font-size:13px; text-align:center; flex-shrink: 0; }
+  .game { background: #111; border: 1px solid #252525; border-radius: 12px; padding: 14px; }
+  .league { color: #888; font-size: 13px; text-transform: uppercase; margin-bottom: 8px; }
+  .team { display: flex; justify-content: space-between; align-items: center; font-size: 22px; font-weight: 700; padding: 4px 0; }
+  .team-info { display: flex; align-items: center; gap: 10px; }
+  .logo { width: 30px; height: 30px; object-fit: contain; }
+  .score { font-variant-numeric: tabular-nums; }
+  .state { color: #bbb; font-size: 13px; margin-top: 7px; }
+  .empty { color: #888; font-size: 20px; padding-top: 25px; }
+  footer { padding: 12px 20px 20px; color: #777; font-size: 13px; text-align: center; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -54,7 +75,7 @@ const sports = [
 ];
 
 let current = 0;
-const ROTATE_MS = 20000; // Increased slightly to give time for scrolling
+const ROTATE_MS = 20000;
 const REFRESH_MS = 60000;
 let scrollInterval = null;
 
@@ -69,9 +90,8 @@ function eventHTML(e) {
   const home = teams.find(t => t.homeAway === "home") || teams[0];
   const away = teams.find(t => t.homeAway === "away") || teams[1];
   const state = e.status?.type?.shortDetail || e.status?.type?.description || "";
-  const league = comp.league?.name || e.league?.name || "";
+  const league = comp.league?.name || "";
 
-  // Extract logos (falling back to a transparent spacer if missing)
   const awayLogo = away?.team?.logo || away?.team?.logos?.[0]?.href || "";
   const homeLogo = home?.team?.logo || home?.team?.logos?.[0]?.href || "";
 
@@ -99,14 +119,12 @@ function startAutoScroll() {
   
   games.style.transform = "translateY(0px)";
   
-  // Calculate overflow distance
   const maxScroll = games.scrollHeight - wrapper.clientHeight;
-  if (maxScroll <= 0) return; // No scroll needed if content fits
+  if (maxScroll <= 0) return;
 
   let currentY = 0;
-  // Scroll speed setup
-  const scrollSpeed = 1; // Pixels per frame
-  const delayStart = 2000; // Pause 2s at top before scrolling
+  const scrollSpeed = 1;
+  const delayStart = 2000;
 
   setTimeout(() => {
     scrollInterval = setInterval(() => {
@@ -143,7 +161,6 @@ async function loadSport(index) {
     document.getElementById("status").textContent =
       "Live scores • " + new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit"});
       
-    // Trigger scrolling once elements are rendered
     setTimeout(startAutoScroll, 100);
 
   } catch (err) {

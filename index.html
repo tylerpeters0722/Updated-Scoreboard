@@ -7,7 +7,6 @@
 <style>
   * { box-sizing: border-box; }
   
-  /* Force 90-degree rotation for landscape displays mounted vertically */
   html, body {
     margin: 0;
     padding: 0;
@@ -17,16 +16,18 @@
     overflow: hidden;
   }
 
+  /* Rotated -90 degrees (Counter-Clockwise) */
   body {
     display: flex;
     flex-direction: column;
     width: 100vh;
     height: 100vw;
-    transform: rotate(90deg);
+    transform: rotate(-90deg);
     transform-origin: top left;
     position: absolute;
-    top: 0;
-    left: 100vw;
+    top: 100vh;
+    left: 0;
+    cursor: pointer; /* Visual cue that clicking activates fullscreen */
   }
 
   header { padding: 28px 24px 18px; border-bottom: 2px solid #222; flex-shrink: 0; }
@@ -62,7 +63,7 @@
     <div class="games" id="games"></div>
   </div>
 </main>
-<footer id="footer">Auto-rotating • Updates every 60 seconds</footer>
+<footer id="footer">Double-click screen for full screen • Auto-rotating</footer>
 
 <script>
 const sports = [
@@ -78,6 +79,15 @@ let current = 0;
 const ROTATE_MS = 20000;
 const REFRESH_MS = 60000;
 let scrollInterval = null;
+
+// Fullscreen toggle on double-click
+document.body.addEventListener("dblclick", () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(err => console.log(err));
+  } else {
+    document.exitFullscreen();
+  }
+});
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
